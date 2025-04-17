@@ -49,25 +49,12 @@ Matplotlib
 Jupyter Notebook
 
 📁 Project Structure
-bash
-Copy
-Edit
+
 📦 mnist-digit-recognition/
 ├── mnist_cnn.ipynb       # Deep Learning notebook
 ├── mnist_cnn.h5          # Trained model file
 ├── README.md             # Project documentation
-▶️ How to Run This Project
-Clone the repository:
 
-bash
-Copy
-Edit
-git clone https://github.com/your-username/mnist-digit-recognition.git
-cd mnist-digit-recognition
-Install dependencies:
-
-bash
-Copy
 Edit
 pip install tensorflow matplotlib numpy
 Run the notebook:
