@@ -1,0 +1,5 @@
+tensorflow
+keras
+numpy
+pillow
+pywin32
