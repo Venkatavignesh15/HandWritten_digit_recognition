@@ -1,5 +1,6 @@
+streamlit
 tensorflow
 keras
 numpy
 pillow
-pywin32
+streamlit-drawable-canvas
