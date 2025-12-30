@@ -1,33 +1,62 @@
-import streamlit as st
-import numpy as np
-from PIL import Image
+import tkinter as tk
 from keras.models import load_model
-from streamlit_drawable_canvas import st_canvas
+from PIL import ImageGrab, Image
+import numpy as np
+import win32gui
 
 # Load model
-model = load_model("mnist.h5")
+model = load_model("model/mnist_cnn.keras")
 
-st.title("✍️ Handwritten Digit Recognition")
+def predict_digit(img):
+    img = img.resize((28, 28))
+    img = img.convert('L')
+    img = np.array(img)
+    img = 255 - img
+    img = img / 255.0
+    img = img.reshape(1, 28, 28, 1)
 
-# Canvas
-canvas = st_canvas(
-    fill_color="black",
-    stroke_width=15,
-    stroke_color="white",
-    background_color="black",
-    width=280,
-    height=280,
-    drawing_mode="freedraw",
-    key="canvas",
-)
+    prediction = model.predict(img)
+    return np.argmax(prediction), np.max(prediction)
 
-if st.button("Predict"):
-    if canvas.image_data is not None:
-        img = canvas.image_data[:, :, 0]
-        img = Image.fromarray(img).resize((28, 28))
-        img = np.array(img) / 255.0
-        img = img.reshape(1, 28, 28, 1)
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Handwritten Digit Recognition")
+        self.geometry("500x350")
 
-        pred = model.predict(img)[0]
-        st.success(f"Prediction: {np.argmax(pred)}")
-        st.write("Confidence:", np.max(pred))
+        self.canvas = tk.Canvas(self, width=300, height=300, bg="white")
+        self.canvas.grid(row=0, column=0, pady=10, padx=10)
+
+        self.label = tk.Label(self, text="Draw a digit", font=("Arial", 24))
+        self.label.grid(row=0, column=1)
+
+        btn_predict = tk.Button(self, text="Predict", command=self.classify)
+        btn_predict.grid(row=1, column=1, pady=5)
+
+        btn_clear = tk.Button(self, text="Clear", command=self.clear)
+        btn_clear.grid(row=1, column=0)
+
+        self.canvas.bind("<B1-Motion>", self.draw)
+
+    def draw(self, event):
+        r = 12
+        self.canvas.create_oval(
+            event.x - r, event.y - r,
+            event.x + r, event.y + r,
+            fill="black"
+        )
+
+    def clear(self):
+        self.canvas.delete("all")
+        self.label.config(text="Draw a digit")
+
+    def classify(self):
+        HWND = self.canvas.winfo_id()
+        rect = win32gui.GetWindowRect(HWND)
+        img = ImageGrab.grab(rect)
+
+        digit, confidence = predict_digit(img)
+        self.label.config(text=f"{digit} ({confidence*100:.2f}%)")
+
+app = App()
+app.mainloop()
